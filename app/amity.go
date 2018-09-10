@@ -8,7 +8,7 @@ import (
 )
 
 type Person struct {
-	Id            int
+	Id            string
 	FirstName     string
 	LastName      string
 	Category      string // fellow or staff
@@ -17,13 +17,14 @@ type Person struct {
 
 // Room models
 type Room struct {
-	Id       string
-	Name     string
-	Category string // office or living space
-	Capacity int
+	Id        string
+	Name      string
+	Category  string // office or living space
+	Capacity  int
+	Occupants []Person
 }
 
-var Rooms []Room
+var Rooms []Room // store all created rooms
 
 func (room *Room) CreateRoom(roomType string) (Room, error) {
 	if room.Name == "" {
