@@ -73,20 +73,23 @@ func (person *Person) AddPerson(personType, wantsAccomodation string) {
 	allocatedOffice, err := allocateRoom("office")
 	if err != nil {
 		fmt.Println(err)
-		return
+	} else {
+		allocatedOffice.Occupants = make([]Person, 6)
+		allocatedOffice.Occupants = append(allocatedOffice.Occupants, *person)
+		fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to office " + allocatedOffice.Name)
 	}
-	allocatedOffice.Occupants = make([]Person, 6)
-	allocatedOffice.Occupants = append(allocatedOffice.Occupants, *person)
-	fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to office " + allocatedOffice.Name)
 	if wantsAccomodation == "yes" && person.Category == "fellow" {
 		allocatedLivingSpace, err := allocateRoom("livingSpace")
 		if err != nil {
 			fmt.Println(err)
-			return
+		} else {
+			allocatedLivingSpace.Occupants = make([]Person, 4)
+			allocatedLivingSpace.Occupants = append(allocatedLivingSpace.Occupants, *person)
+			fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to living space " + allocatedOffice.Name)
 		}
-		allocatedLivingSpace.Occupants = make([]Person, 4)
-		allocatedLivingSpace.Occupants = append(allocatedLivingSpace.Occupants, *person)
-		fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to living space " + allocatedOffice.Name)
+	}
+	if personType == "staff" && wantsAccomodation == "yes" {
+		fmt.Println("Staff members are not entitled to living spaces.")
 	}
 }
 
@@ -116,4 +119,26 @@ func allocatableRooms(roomType string) ([]Room, error) {
 		}
 	}
 	return availableRooms, nil
+}
+
+func ListPeople(personType string) {
+	if len(People) > 0 {
+		if personType == "fellow" || personType == "staff" {
+			fmt.Println("List of all " + personType + "s")
+			fmt.Println("ID\tFirst Name\tLast Name\tCategory")
+			for _, person := range People {
+				if person.Category == personType {
+					fmt.Println(person.Id + "\t" + person.FirstName + "\t" + person.LastName + "\t")
+				}
+			}
+			return
+		}
+		fmt.Println("List of all people.\n")
+		fmt.Println("ID\tFirst Name\tLast Name\tCategory")
+		for _, person := range People {
+			fmt.Println(person.Id + "\t" + person.FirstName + "\t" + person.LastName + "\t" + person.Category)
+		}
+		return
+	}
+	fmt.Println("There are no People in the system.")
 }
