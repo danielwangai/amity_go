@@ -142,3 +142,25 @@ func ListPeople(personType string) {
 	}
 	fmt.Println("There are no People in the system.")
 }
+
+func ListRooms(roomType string) {
+	if len(Rooms) > 0 {
+		if roomType == "office" || roomType == "living_space" {
+			fmt.Println("List of all " + roomType + "s")
+			fmt.Println("ID\tRoom Name\tMax Capacity")
+			for _, room := range Rooms {
+				if room.Category == roomType {
+					fmt.Println(room.Id + "\t" + room.Name + "\t" + string(room.Capacity) + "\t")
+				}
+			}
+			return
+		}
+		fmt.Println("List of all rooms")
+		fmt.Println("ID\tRoom Name\tMax Capacity\tRoom Type")
+		for _, room := range Rooms {
+			fmt.Println(room.Id + "\t" + room.Name + "\t" + string(room.Capacity) + "\t" + room.Category)
+		}
+		return
+	}
+	fmt.Println("There are no rooms added yet.")
+}
