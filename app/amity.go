@@ -203,6 +203,15 @@ func ListRoomDetail(roomId string) {
 	}
 }
 
+func GetPersonDetails(personId string) {
+	person, err := getPersonById(personId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%s %s - %s\n", person.FirstName, person.LastName, person.Category)
+}
+
 func getRoomById(roomId string) (*Room, error) {
 	for _, room := range Rooms {
 		if room.Id == roomId {
@@ -210,4 +219,55 @@ func getRoomById(roomId string) (*Room, error) {
 		}
 	}
 	return nil, errors.New("Room matching ID not found.")
+}
+
+func getPersonById(personId string) (*Person, error) {
+	for _, person := range People {
+		if person.Id == personId {
+			return &person, nil
+		}
+	}
+	return nil, errors.New("Person matching ID not found.")
+}
+
+func GetOfficeFromPersonId(personId string) (*Room, error) {
+	person, err := getPersonById(personId)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	fmt.Printf("%s %s - %s\n", person.FirstName, person.LastName, person.Category)
+	for _, room := range Rooms {
+		if room.Category == "office" {
+			for _, p := range room.Occupants {
+				if p.Id == person.Id {
+					return &room, nil
+				}
+			}
+		}
+	}
+	return nil, errors.New("Person matching ID is not allocated an office space.")
+}
+
+func GetLivingSpaceFromPersonId(personId string) (*Room, error) {
+	// for fellows only
+	person, err := getPersonById(personId)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	if person.Category == "fellow" {
+		fmt.Printf("%s %s - %s\n", person.FirstName, person.LastName, person.Category)
+		for _, room := range Rooms {
+			if room.Category == "living_space" {
+				for _, p := range room.Occupants {
+					if p.Id == person.Id {
+						return &room, nil
+					}
+				}
+			}
+		}
+		return nil, errors.New("Person matching ID is not allocated a living space.")
+	}
+	return nil, errors.New("Staff members are not allocated living spaces.")
 }
