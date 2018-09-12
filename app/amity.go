@@ -28,32 +28,34 @@ type Room struct {
 var Rooms []Room // store all created rooms
 var People []Person
 
-func (room *Room) CreateRoom(roomType string) (Room, error) {
-	if room.Name == "" {
+func CreateRoom(name, roomType string) (*Room, error) {
+	if name == "" {
 		fmt.Println("Cannot create a room without a name")
-		return Room{}, errors.New("Cannot create a room without a name")
+		return nil, errors.New("Cannot create a room without a name")
 	}
 	for _, r := range Rooms {
-		if room.Name == r.Name {
-			return Room{}, errors.New("A room with the same name exists.")
+		if name == r.Name {
+			return nil, errors.New("A room with the same name exists.")
 		}
 	}
+	room := Room{Id: uuid.Must(uuid.NewV4()).String(), Name: name, Category: roomType}
 	if roomType == "office" {
 		// living spaces have 4 slots
-		room.Capacity = 4
+		room.Capacity = 6
+		room.Occupants = make([]Person, 6)
 	} else if roomType == "living_space" {
 		// living spaces have 6 slots
-		room.Capacity = 6
+		room.Capacity = 4
+		room.Occupants = make([]Person, 4)
 	} else {
-		return Room{}, errors.New("A room can only be living space or office.")
+		return nil, errors.New("A room can only be living space or office.")
 	}
-	room.Id = uuid.Must(uuid.NewV4()).String()
 	room.Category = roomType
-	Rooms = append(Rooms, *room)
-	return *room, nil
+	Rooms = append(Rooms, room)
+	return &room, nil
 }
 
-func (person *Person) AddPerson(personType, wantsAccomodation string) {
+func AddPerson(firstName, lastName, personType, wantsAccomodation string) (*Person, error) {
 	/*
 		personType: can be either fellow or staff
 		wantsAccomodation: accepts Yes or No
@@ -62,45 +64,64 @@ func (person *Person) AddPerson(personType, wantsAccomodation string) {
 			- office
 			- living space - only for fellows opting for it. STRICTLY not for staff members
 	*/
-	if person.FirstName == "" || person.LastName == "" {
+	if firstName == "" || lastName == "" {
 		fmt.Println("Name of person required.")
-		return
+		return nil, errors.New("Name of person required.")
 	}
-	person.Id = uuid.Must(uuid.NewV4()).String()
-	person.Category = personType
-	People = append(People, *person)
-	// allocate room
-	allocatedOffice, err := allocateRoom("office")
+	person := Person{Id: uuid.Must(uuid.NewV4()).String(), FirstName: firstName, LastName: lastName, Category: personType}
+	People = append(People, person)
+	// allocate office
+	allocatedOffice, err := getRandomRoom("office")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		allocatedOffice.Occupants = make([]Person, 6)
-		allocatedOffice.Occupants = append(allocatedOffice.Occupants, *person)
+		allocatedOffice.allocateRoom(person)
 		fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to office " + allocatedOffice.Name)
 	}
 	if wantsAccomodation == "yes" && person.Category == "fellow" {
-		allocatedLivingSpace, err := allocateRoom("livingSpace")
+		allocatedLivingSpace, err := getRandomRoom("living_space")
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			allocatedLivingSpace.Occupants = make([]Person, 4)
-			allocatedLivingSpace.Occupants = append(allocatedLivingSpace.Occupants, *person)
+			allocatedLivingSpace.allocateRoom(person)
 			fmt.Println(person.FirstName + " " + person.LastName + " has been allocated to living space " + allocatedOffice.Name)
 		}
 	}
 	if personType == "staff" && wantsAccomodation == "yes" {
 		fmt.Println("Staff members are not entitled to living spaces.")
 	}
+	return &person, nil
 }
 
-func allocateRoom(roomType string) (Room, error) {
+func (room *Room) allocateRoom(person Person) {
+	occupants := room.getOccupiedSlots()
+	if occupants > 0 {
+		room.Occupants[occupants-1] = person
+		fmt.Println("OCcupants - ", *room)
+	} else {
+		room.Occupants[0] = person
+		fmt.Println("OCcupants -> ", *room)
+	}
+}
+
+func (room Room) getOccupiedSlots() int {
+	count := 0
+	for _, person := range room.Occupants {
+		if len(person.Id) > 0 {
+			count++
+		}
+	}
+	return count
+}
+
+func getRandomRoom(roomType string) (Room, error) {
 	// Randomly allocates a room
 	availableRooms, err := allocatableRooms(roomType)
 	if err != nil {
 		fmt.Println(err)
 		return Room{}, err
 	}
-	allocatedRoom := availableRooms[rand.Intn(len(availableRooms)-1)]
+	allocatedRoom := availableRooms[rand.Intn(len(availableRooms))]
 	return allocatedRoom, nil
 }
 
@@ -114,7 +135,7 @@ func allocatableRooms(roomType string) ([]Room, error) {
 		if room.Category != roomType {
 			continue
 		}
-		if room.Category == roomType {
+		if room.Category == roomType && (room.Capacity-room.getOccupiedSlots()) > 0 {
 			availableRooms = append(availableRooms, room)
 		}
 	}
@@ -133,7 +154,7 @@ func ListPeople(personType string) {
 			}
 			return
 		}
-		fmt.Println("List of all people.\n")
+		fmt.Println("List of all people.")
 		fmt.Println("ID\tFirst Name\tLast Name\tCategory")
 		for _, person := range People {
 			fmt.Println(person.Id + "\t" + person.FirstName + "\t" + person.LastName + "\t" + person.Category)
