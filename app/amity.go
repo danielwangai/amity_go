@@ -185,3 +185,29 @@ func ListRooms(roomType string) {
 	}
 	fmt.Println("There are no rooms added yet.")
 }
+
+func ListRoomDetail(roomId string) {
+	room, err := getRoomById(roomId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%s - %s\n\n", room.Name, room.Category)
+	if len(room.Occupants) == 0 {
+		fmt.Println("Room has no occupants")
+		return
+	}
+	fmt.Println("Occupants\n")
+	for _, person := range room.Occupants {
+		fmt.Printf("%s\t%s\t%s\t%s", person.Id, person.FirstName, person.LastName, person.Category)
+	}
+}
+
+func getRoomById(roomId string) (*Room, error) {
+	for _, room := range Rooms {
+		if room.Id == roomId {
+			return &room, nil
+		}
+	}
+	return nil, errors.New("Room matching ID not found.")
+}
