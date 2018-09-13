@@ -287,6 +287,57 @@ func GetAllocatedPeople() ([]Person, error) {
 	return []Person{}, errors.New("There are no allocated people.")
 }
 
+func ReallocatePerson(personId, newRoomId, roomType string) {
+	newRoom, rmErr := getRoomById(newRoomId)
+	if rmErr != nil {
+		fmt.Println(rmErr)
+		return
+	}
+	_, pErr := getPersonById(personId)
+	if pErr != nil {
+		fmt.Println(pErr)
+		return
+	}
+	oldRoom := Room{}
+	if roomType == "office" {
+		room, err := GetOfficeFromPersonId(personId)
+		if err != nil {
+			fmt.Println("Reallocation unsuccessful.")
+			fmt.Println(err)
+			return
+		}
+		oldRoom = *room
+	} else {
+		room, err := GetOfficeFromPersonId(personId)
+		if err != nil {
+			fmt.Println("Reallocation unsuccessful.")
+			fmt.Println(err)
+			return
+		}
+		oldRoom = *room
+	}
+	if oldRoom.Category != newRoom.Category {
+		fmt.Println("Cannot reallocate to a different room type.")
+		return
+	}
+	if oldRoom.Id == newRoom.Id {
+		fmt.Println("Cannot reallocate to the same room.")
+		return
+	}
+	for k, p := range oldRoom.Occupants {
+		if p.Id == personId {
+			oldRoom.Occupants[k] = Person{}
+			// reallocate
+			if newRoom.getOccupiedSlots() > 0 {
+				newRoom.Occupants[newRoom.getOccupiedSlots()-1] = p
+			}
+			newRoom.Occupants[newRoom.getOccupiedSlots()] = p
+			break
+		}
+	}
+	fmt.Println("Reallocation done successfully.")
+}
+
 /*
 func GetUnallocatedPeople() ([]Person, error) {
 	unAllocatedPeople := make([]Person, 1)

@@ -10,8 +10,10 @@ func main() {
 	rm1, _ := app.CreateRoom("Valhalla", "office")
 	fmt.Println(*rm1)
 	fmt.Println("========")
-	rm2, _ := app.CreateRoom("Ruby", "living_space")
+	rm2, _ := app.CreateRoom("Ruby", "office")
+	rm4, _ := app.CreateRoom("Python", "office")
 	_ = rm2
+	_ = rm4
 	// rm2 := app.Room{Name: "Hogwarts"}
 	// rm2.CreateRoom("office")
 	// p1 := app.Person{FirstName: "one", LastName: "two"}
@@ -30,4 +32,7 @@ func main() {
 	fmt.Println(app.GetAllocatedPeople())
 	fmt.Println(">>>>>>>>>><<<")
 	fmt.Println(app.People)
+	app.ReallocatePerson(p1.Id, rm2.Id, "office")
+	fmt.Println(app.Rooms)
+
 }
