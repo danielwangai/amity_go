@@ -7,7 +7,27 @@ import (
 )
 
 func main() {
-	fmt.Println("Test")
-	rm := app.Room{Id: "21321", Name: "Valhalla"}
-	fmt.Println(rm.CreateRoom("office"))
+	rm1, _ := app.CreateRoom("Valhalla", "office")
+	fmt.Println(*rm1)
+	fmt.Println("========")
+	rm2, _ := app.CreateRoom("Ruby", "living_space")
+	_ = rm2
+	// rm2 := app.Room{Name: "Hogwarts"}
+	// rm2.CreateRoom("office")
+	// p1 := app.Person{FirstName: "one", LastName: "two"}
+	p1, _ := app.AddPerson("Daniel", "Maina", "staff", "yes")
+	fmt.Println("OCC -> ", rm1.Occupants)
+	fmt.Println("OCC -> ", rm2.Occupants)
+	app.ListPeople("all")
+	app.ListRooms("all")
+	fmt.Println("========")
+	fmt.Println(app.Rooms)
+	fmt.Println("========")
+	app.ListRoomDetail(rm1.Id)
+	fmt.Println("========")
+	rm3, _ := app.GetLivingSpaceFromPersonId(p1.Id)
+	fmt.Println("====>", rm3)
+	fmt.Println(app.GetAllocatedPeople())
+	fmt.Println(">>>>>>>>>><<<")
+	fmt.Println(app.People)
 }

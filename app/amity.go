@@ -116,7 +116,7 @@ func (room Room) getOccupiedSlots() int {
 
 func getRandomRoom(roomType string) (Room, error) {
 	// Randomly allocates a room
-	availableRooms, err := allocatableRooms(roomType)
+	availableRooms, err := GetRoomsWithAvailableSlots(roomType)
 	if err != nil {
 		fmt.Println(err)
 		return Room{}, err
@@ -125,7 +125,7 @@ func getRandomRoom(roomType string) (Room, error) {
 	return allocatedRoom, nil
 }
 
-func allocatableRooms(roomType string) ([]Room, error) {
+func GetRoomsWithAvailableSlots(roomType string) ([]Room, error) {
 	// return a slice of rooms of type roomType having available slots.
 	availableRooms := make([]Room, 1)
 	if len(Rooms) == 0 {
@@ -271,3 +271,40 @@ func GetLivingSpaceFromPersonId(personId string) (*Room, error) {
 	}
 	return nil, errors.New("Staff members are not allocated living spaces.")
 }
+
+func GetAllocatedPeople() ([]Person, error) {
+	allocatedPeople := make([]Person, 1)
+	for _, room := range Rooms {
+		for _, person := range room.Occupants {
+			if len(person.Id) > 0 {
+				allocatedPeople = append(allocatedPeople, person)
+			}
+		}
+	}
+	if len(allocatedPeople) > 0 {
+		return allocatedPeople, nil
+	}
+	return []Person{}, errors.New("There are no allocated people.")
+}
+
+/*
+func GetUnallocatedPeople() ([]Person, error) {
+	unAllocatedPeople := make([]Person, 1)
+	allocated, err := GetAllocatedPeople()
+	if err != nil {
+		return People, nil
+	}
+	for _, person := range People {
+		for _, p := range allocated {
+			if person.Id == p.Id {
+				continue
+			}
+			unAllocatedPeople = append(unAllocatedPeople, person)
+		}
+	}
+	if len(unAllocatedPeople) > 0 {
+		return unAllocatedPeople, nil
+	}
+	return []Person{}, errors.New("There are no unallocated people.")
+}
+*/
